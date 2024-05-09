@@ -6,6 +6,7 @@ use App\Http\Controllers\API\UsersController;
 use App\Http\Controllers\API\CategoriesController;
 use App\Http\Controllers\API\ProductsController;
 use App\Http\Controllers\API\ImagesController;
+use App\Http\Controllers\API\CommentsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +22,12 @@ use App\Http\Controllers\API\ImagesController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+//products
 Route::get('/products', [ProductsController::class, 'index']);
 Route::get('/products/get/{product_id}', [ProductsController::class, 'show']);
+//comments
+Route::post('/comments', [CommentsController::class, 'store']);
+Route::get('/comments/get/{product_id}', [CommentsController::class, 'show']);
 
 Auth::routes();
 // users
@@ -36,6 +40,8 @@ Route::post('/categories', [CategoriesController::class, 'store']);
 Route::get('/categories', [CategoriesController::class, 'index']);
 //products
 Route::post('/products', [ProductsController::class, 'store']);
-
 //images
 Route::get('/images/{product_id}', [ImagesController::class, 'show']);
+//comments
+Route::delete('/comments/{comment_id}', [CommentsController::class, 'destroy']);
+Route::put('/comments/{comment_id}', [CommentsController::class, 'update']);

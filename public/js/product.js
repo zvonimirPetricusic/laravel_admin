@@ -5,6 +5,7 @@
 
     var categories = function () {
         var images = '';
+        var comments = '';
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
         var siteUrl = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '') + '/';
@@ -43,61 +44,48 @@
     
         };
 
-        var initSubmit = function(){
-            $('#addProduct button[data-toggle="save-form"]').on('click', function (e) {
-                $('#addProduct form').trigger('submit');
+        var initComments = function(){
+            $.getJSON("/api/comments/get/" + id, function (res) {
+                for(var key in res){
+                    comments+='<div class="card mb-3">' +
+                                '<div class="card-body">' +
+                                    '<p class="card-text">' + res[key]['comment'] + '</p>' + 
+                                '</div>' +
+                            '</div>';
+                }
+
+                $('#commentsContainer').html(comments);
             });
 
-            $('#filterBtn').on('click', function (e) {
-                filter_category_id =  ($('#filter_category_id').val() === null) ? false : $('#filter_category_id').val();
-                filter_subcategory_id = ($('#filter_subcategory_id').val() === null) ? false : $('#filter_subcategory_id').val();
-                filter_sub_subcategory_id = ($('#filter_sub_subcategory_id').val() === null) ? false : $('#filter_sub_subcategory_id').val();
-                filter_price_min = ($('#filter_price_min').val() === '') ? false : $('#filter_price_min').val();
-                filter_price_max = ($('#filter_price_max').val() === '') ? false : $('#filter_price_max').val();
+        };
 
-                console.log($('#filter_price_min').val());
-
-                products = '';
-                init(filter_category_id, filter_subcategory_id, filter_sub_subcategory_id, filter_price_min, filter_price_max);
+        var initSubmit = function(){
+            $('button[data-toggle="comment"]').on('click', function (e) {
+                $('#commentForm').trigger('submit');
             });
         };
 
         var initValidation = function(){
-            $('#addProduct form').validate({
+            $('#commentForm').validate({
                 rules: {
-                    description: {
-                        required: true
-                    },
-                    price: {
-                        required: true
-                    },
-                    category_id: {
+                    comment: {
                         required: true
                     }
                 },
                 submitHandler: function (form) {
-                    var formData = new FormData($('#addProduct form')[0]);
-                    formData.append('main_image_index', mainImageIndex);
-                    if (imageList.length > 0) {
-                        $.each(imageList, function(index, file) {
-                            formData.append('images[]', file);
-                        });
-                    }
+                    var formData = new FormData($('#commentForm')[0]);
     
                     $.ajax({
-                        url: '/api/products',
+                        url: '/api/comments?product_id=' + id,
                         type: 'POST',
                         data: formData,
                         processData: false,
                         contentType: false,
                         success: function (res) {
                             if (res.status === 'success') {
-                                alertResponse('Success', res.message, 'success');
-                                $('#addProduct .close').click();
-                                $('#addProduct form')[0].reset();
-
-                                products = '';
-                                init(filter_category_id, filter_subcategory_id, filter_sub_subcategory_id, filter_price_min, filter_price_max);
+                                $('#commentForm')[0].reset();
+                                comments = '';
+                                initComments();
                             }else{
                                 alertResponse('Error', 'Error while submitting form!', 'error');
                             }
@@ -231,9 +219,10 @@
     
         return {
             init: function () {
+                initComments();
                 init();
-                //initSubmit();
-                //initValidation();
+                initSubmit();
+                initValidation();
                 //handleElements();
                 //initCategories();
             }

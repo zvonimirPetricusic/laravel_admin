@@ -141,7 +141,6 @@ class ProductsController extends Controller
             return Response::response('error', $e->getMessage(), $product, 500);
         }
     }
-    
 
     /**
      * Display the specified resource.
